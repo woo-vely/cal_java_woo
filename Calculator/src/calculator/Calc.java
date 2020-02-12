@@ -2,147 +2,204 @@ package calculator;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridLayout;
-
-import java.awt.Container;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class Calc implements ActionListener{
-	JFrame f = new JFrame();
-	JTextField display;
-	JLabel prev, last, operator;
-	JPanel displayPanel;
-	JPanel btnPanel = new JPanel();
-	JButton[] btn = new JButton[17];
+public class Calc extends JFrame implements ActionListener{
+	private JPanel displayPanel;
+	private JPanel btnPanel;
+	private JPanel debugPanel;
+	
+	private JTextField display;
+	
+	private JButton[] btn;
+	private JButton btnPlus;
+	private JButton btnMinus;
+	private JButton btnMulti;
+	private JButton btnDiv;
+	private JButton btnClear;
+	private JButton btnResult;
+	
+	private JLabel prev;
+	private JLabel operator;
+	private JLabel flag;
+	
+	double op1, op2, result;
+	
+	public static void main(String[] args) {
+		Calc calc = new Calc();
+	}
 	
 	public Calc() {
+		this.setSize(300,400);
+		this.setTitle("Calculator");
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		f.add(btnPanel);
-		
-		prev = new JLabel("");
-		last = new JLabel("");
-		operator = new JLabel("");
-		
+		this.setLayout(new BorderLayout());
 		displayPanel = new JPanel();
-		displayPanel.setLayout(new FlowLayout());
-		btnPanel.setLayout(new GridLayout(0,4));
+		btnPanel = new JPanel();
+		debugPanel = new JPanel();
 		
-		/*out = new JLabel("0", JLabel.RIGHT);
-		out.setOpaque(true);
-		f.add(out, BorderLayout.NORTH);*/
+		displayPanel.setLayout(new FlowLayout());
+		btnPanel.setLayout(new GridLayout(0,4,5,5));
+		debugPanel.setLayout(new FlowLayout());
 		
 		display = new JTextField(11);
 		display.setText("0");
 		display.setHorizontalAlignment(JTextField.RIGHT);
-
 		
+		displayPanel.add(display);
 		
+		btn = new JButton[10];
 		for(int i=0; i<10; i++) {
 			btn[i] = new JButton(String.valueOf(i));
+			btn[i].addActionListener(this);
 		}
-		btn[11] = new JButton("/");
-		btn[12] = new JButton("*");
-		btn[13] = new JButton("+");
-		btn[14] = new JButton("-");
-		btn[15] = new JButton("CE");
-		btn[16] = new JButton("=");
+		btnPlus = new JButton("+");
+		btnMinus = new JButton("-");
+		btnMulti = new JButton("*");
+		btnDiv = new JButton("/");
+		btnResult = new JButton("=");
+		btnClear = new JButton("CE");
 		
-		
+		btnPlus.addActionListener(this);
+		btnMinus.addActionListener(this);
+		btnMulti.addActionListener(this);
+		btnDiv.addActionListener(this);
+		btnResult.addActionListener(this);
+		btnClear.addActionListener(this);
 		
 		for(int i=7; i<=9; i++) {
 			btnPanel.add(btn[i]);
-			btn[i].addActionListener(this);
 		}
-		btnPanel.add(btn[11]);
-		btn[11].addActionListener(this);
-		
+		btnPanel.add(btnDiv);
 		for(int i=4; i<=6; i++) {
 			btnPanel.add(btn[i]);
-			btn[i].addActionListener(this);
 		}
-		btnPanel.add(btn[12]);
-		btn[12].addActionListener(this);
-		
+		btnPanel.add(btnMulti);
 		for(int i=1; i<=3; i++) {
 			btnPanel.add(btn[i]);
-			btn[i].addActionListener(this);
 		}
-		btnPanel.add(btn[13]);
-		btn[13].addActionListener(this);
-		
-		btnPanel.add(btn[15]);
-		btn[15].addActionListener(this);
+		btnPanel.add(btnPlus);
+		btnPanel.add(btnClear);
 		btnPanel.add(btn[0]);
-		btn[0].addActionListener(this);
-		btnPanel.add(btn[16]);
-		btn[16].addActionListener(this);
-		btnPanel.add(btn[14]);
-		btn[14].addActionListener(this);
+		btnPanel.add(btnResult);
+		btnPanel.add(btnMinus);
 		
-	
+		prev = new JLabel("");
+		operator = new JLabel("");
+		flag = new JLabel("");
 		
-		f.setSize(500,600);
-		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		f.setVisible(true);
+		debugPanel.add(new JLabel("prev: "));
+		debugPanel.add(prev);
+		debugPanel.add(new JLabel("operator: "));
+		debugPanel.add(operator);
+		debugPanel.add(new JLabel("flag: "));
+		debugPanel.add(flag);
+		
+		this.add(displayPanel, BorderLayout.NORTH);
+		this.add(btnPanel, BorderLayout.CENTER);
+		this.add(debugPanel, BorderLayout.SOUTH);
+		
+		this.setVisible(true);
+		//System.out.println(btn.length);
 	}
-	public static void main(String[] args) {
-		new Calc();
-	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		for(int i=0; i<10; i++) {
-			if(e.getSource().equals(btn[i])) {
-				display.setText(String.valueOf(i));
-			}
-			if(e.getSource().equals(btn[16])) {
-				double op1, op2, result;
-				op1 = Double.parseDouble(prev.getText());
-				op2 = Double.parseDouble(last.getText());
-				
-				if(operator.getText().equals("+")) {
-					result = op1+op2;
-				}
-				if(operator.getText().equals("-")) {
-					result = op1-op2;
-				}
-				if(operator.getText().equals("*")) {
-					result = op1*op2;
-				}
-				if(operator.getText().equals("/")) {
-					result = op1/op2;
+		for(int i=0; i<btn.length; i++) {
+			if(e.getSource() == btn[i]) {
+				if(display.getText().equals("0")) {
+					display.setText(""+i);
+				}else {
+					if(operator.getText().equals("")) {
+						display.setText(display.getText()+i);
+					}else {
+						if(flag.getText().equals("")) {
+							display.setText(""+i);
+							flag.setText("#");
+						}else {
+							display.setText(display.getText()+i);
+						}
+					}
 				}
 			}
-						
-			/*else if(e.getSource().equals(btn[12])) {
-				out.setText("*");
-				operator();
-			}else if(e.getSource().equals(btn[13])) {
-				out.setText("+");
-			}else if(e.getSource().equals(btn[14])) {
-				out.setText("-");
-			}else if(e.getSource().equals(btn[15])) {
-				clearAll();
-			}else if(e.getSource().equals(btn[16])) {
-				out.setText("");
-			}*/
 		}
 		
-	}
-	private void operator() {
-		// TODO Auto-generated method stub
+		if(e.getSource() == btnClear) {
+			clearAll();
+		}
+		if(e.getSource() == btnPlus) {
+			prev.setText(display.getText());
+			operator.setText("+");
+			flag.setText("");
+		}
+		if(e.getSource() == btnMinus) {
+			prev.setText(display.getText());
+			operator.setText("-");
+			flag.setText("");
+		}
+		if(e.getSource() == btnMulti) {
+			prev.setText(display.getText());
+			operator.setText("*");
+			flag.setText("");
+		}
+		if(e.getSource() == btnDiv) {
+			prev.setText(display.getText());
+			operator.setText("/");
+			flag.setText("");
+		}
 		
+		if(e.getSource() == btnResult) {
+			op1 = Double.parseDouble(prev.getText());
+			op2 = Double.parseDouble(display.getText());
+			
+			if(operator.getText().equals("+")) {
+				result = op1+op2;
+				display.setText(""+result);
+			}
+			if(operator.getText().equals("-")) {
+				result = op1-op2;
+				display.setText(""+result);
+			}
+			if(operator.getText().equals("*")) {
+				result = op1*op2;
+				display.setText(""+result);
+			}
+			if(operator.getText().equals("/")) {
+				result = op1/op2;
+				display.setText(""+result);
+			}
+		}
 	}
+
 	private void clearAll() {
 		display.setText("0");
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
